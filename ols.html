@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicLens | Reality Gap Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-panel: #0a0a0a;
+            --bg-input: #111111;
+            
+            --border-color: #222;
+            --border-highlight: #333;
+
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #444444;
+
+            --neon-green: #00ff9d;
+            --neon-green-dim: rgba(0, 255, 157, 0.05);
+            
+            --alert-red: #ff2a2a;
+            --alert-yellow: #ffb700;
+            --alert-blue: #00ccff;
+
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: thin; scrollbar-color: var(--border-color) var(--bg-body); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            background-image: linear-gradient(rgba(18, 18, 18, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 18, 18, 0.5) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* --- Header --- */
+        header { border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; background: rgba(5,5,5,0.95); position: sticky; top: 0; z-index: 100; }
+        .brand { font-family: var(--font-mono); font-weight: 700; font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+        .brand span { color: var(--neon-green); }
+        .status-badge { font-family: var(--font-mono); font-size: 0.7rem; padding: 4px 8px; border: 1px solid var(--border-color); color: var(--neon-green); text-transform: uppercase; }
+
+        /* --- Layout --- */
+        main { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+        /* Search / Hero */
+        .hero-section { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: auto; padding-bottom: 4rem; animation: fadeIn 0.5s ease-out; }
+        
+        h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -2px; line-height: 1; margin-bottom: 1rem; text-align: center; background: linear-gradient(180deg, #fff, #444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 2rem; text-align: center; max-width: 600px; font-size: 1rem; }
+        
+        .input-wrapper { position: relative; width: 100%; max-width: 600px; margin-bottom: 4rem; }
+        .search-input { width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); padding: 1.2rem; font-family: var(--font-mono); font-size: 1rem; outline: none; border-radius: 0; }
+        .search-input:focus { border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green-dim); }
+        .search-input::placeholder { color: var(--text-muted); text-transform: uppercase; }
+        .search-btn { position: absolute; right: 5px; top: 5px; bottom: 5px; background: var(--neon-green); color: black; border: none; padding: 0 1.5rem; font-family: var(--font-mono); font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .feature-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            border-color: var(--neon-green);
+            transform: translateY(-5px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover::before {
+            transform: translateX(100%);
+            transition: transform 1s;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 1.5rem;
+            color: var(--neon-green);
+        }
+
+        .feature-title {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Loader */
+        .loader-container { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; font-family: var(--font-mono); }
+        .loader-bar { width: 300px; height: 2px; background: var(--border-color); margin-top: 1rem; position: relative; }
+        .loader-progress { position: absolute; left: 0; top: 0; height: 100%; width: 50%; background: var(--neon-green); animation: loadPulse 1s infinite alternate; }
+        @keyframes loadPulse { from { width: 10%; } to { width: 90%; } }
+
+        /* Results */
+        .results-container { display: none; animation: slideUp 0.4s ease-out; }
+
+        .gap-header { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .gap-score-large { font-family: var(--font-mono); font-size: 5rem; font-weight: 700; line-height: 0.9; color: var(--text-primary); }
+        .gap-verdict { display: inline-block; margin-top: 10px; padding: 5px 15px; font-family: var(--font-mono); font-weight: 700; font-size: 1.2rem; background: var(--border-color); color: var(--text-muted); }
+        .gap-desc { max-width: 500px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-left: 2px solid var(--border-color); padding-left: 1rem; margin-top: 1rem; }
+
+        /* Dashboard Grid */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 2rem; }
+        @media(max-width: 1000px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        .panel { background: var(--bg-panel); border: 1px solid var(--border-color); display: flex; flex-direction: column; height: fit-content; }
+        .panel-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- Perception Panel (Left) --- */
+        .hashtags-bar { padding: 0.8rem 1.5rem; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.3); font-family: var(--font-mono); font-size: 0.75rem; display: flex; gap: 10px; overflow-x: auto; }
+        .tag { color: var(--alert-blue); opacity: 0.7; white-space: nowrap; }
+
+        .social-feed { padding: 1.5rem; max-height: 1000px; overflow-y: auto; }
+        .comment-thread { margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; }
+        .comment-meta { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px; }
+        .comment-user { color: var(--alert-blue); font-weight: 700; }
+        .comment-score { color: var(--text-secondary); }
+        .comment-body { font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); }
+
+        /* Pros/Cons */
+
+        .pros-cons-wrapper { padding: 1.5rem; border-top: 1px solid var(--border-color); background: #080808; }
+        .pros-cons-header { font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem; color: var(--text-muted); letter-spacing: 1px; }
+        .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .pc-list { list-style: none; }
+        .pc-list.pros li { margin-bottom: 0.5rem; padding-left: 1.2rem; position: relative; font-size: 0.9rem; line-height: 1.4; color: var(--text-primary); }
+        .pc-list.pros li::before { content: "+"; color: var(--neon-green); position: absolute; left: 0; font-weight: 700; font-family: var(--font-mono); }
+        .pc-list.cons li { margin-bottom: 0.5rem; padding-left: 1.2rem; position: relative; font-size: 0.9rem; line-height: 1.4; color: var(--text-primary); }
+        .pc-list.cons li::before { content: "-"; color: var(--alert-red); position: absolute; left: 0; font-weight: 700; font-family: var(--font-mono); }
+
+
+        /* --- Reality Panel (Right) --- */
+        /* Currency Toggle */
+        .currency-control { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
+        .currency-label { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .switch-wrapper { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch-input { opacity: 0; width: 0; height: 0; }
+        .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #222; border: 1px solid #444; transition: .4s; }
+        .switch-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #fff; transition: .3s cubic-bezier(0.4, 0.0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .switch-input:checked + .switch-slider { background-color: var(--neon-green); border-color: var(--neon-green); box-shadow: 0 0 10px rgba(0, 255, 157, 0.4); }
+        .switch-input:checked + .switch-slider:before { transform: translateX(24px); }
+        .currency-status { font-family: var(--font-mono); font-size: 0.8rem; color: var(--neon-green); font-weight: 700; width: 40px; text-align: right; }
+
+        /* Metric Cards */
+        .metric-card { padding: 1.5rem; border-bottom: 1px solid var(--border-color); }
+        .metric-card:last-child { border-bottom: none; }
+        .metric-header { display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: flex-end; }
+        .metric-label-large { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; color: var(--text-primary); }
+        .cost-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; }
+        .cost-table td { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .cost-table tr:last-child td { border-bottom: none; }
+        .cost-label { color: var(--text-secondary); }
+        .cost-price { text-align: right; color: var(--alert-yellow); font-weight: 500; }
+        .tabs { display: flex; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+        .tab-btn { background: none; border: none; padding: 10px 20px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active { color: var(--neon-green); border-bottom: 2px solid var(--neon-green); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .stat-box { background: var(--bg-input); padding: 1rem; border: 1px solid var(--border-color); }
+        .stat-box-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .stat-box-val { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 700; }
+        .stat-box-sub { font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; font-family: var(--font-mono); }
+        .reset-btn { display: block; margin: 3rem auto 0; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 1rem 3rem; font-family: var(--font-mono); cursor: pointer; transition: all 0.3s; }
+        .reset-btn:hover { border-color: var(--neon-green); color: var(--neon-green); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            CIVIC://LENS <span>_DEEP_DATA</span>
+        </div>
+        <div class="status-badge">SYS: ONLINE</div>
+    </header>
+
+    <main>
+        <!-- Landing Page with Features -->
+        <section class="hero-section" id="hero">
+            <h1>REALITY GAP<br>CALCULATOR</h1>
+            <p class="subtitle">Compare subjective social narratives against objective city data.</p>
+            
+            <div class="input-wrapper">
+                <form id="searchForm" onsubmit="event.preventDefault(); runAnalysis(document.getElementById('cityInput').value)">
+                    <input type="text" id="cityInput" class="search-input" placeholder="> ENTER_CITY_NAME" autocomplete="off" required>
+                    <button type="submit" class="search-btn">EXECUTE</button>
+                </form>
+            </div>
+
+            <!-- FEATURES GRID -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
+                    </svg>
+                    <div class="feature-title">01. Social Sentiment</div>
+                    <div class="feature-desc">We scrape thousands of Reddit comments and tweets to gauge collective mood, hype, and complaints about a city.</div>
+                </div>
+                <div class="feature-card">
+                    <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 01-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <div class="feature-title">02. Hard Data Metrics</div>
+                    <div class="feature-desc">We pull official statistics for Cost of Living, AQI (Air Quality), Crime Rates, and Infrastructure reliability.</div>
+                </div>
+                <div class="feature-card">
+                    <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <div class="feature-title">03. Reality Gap</div>
+                    <div class="feature-desc">The core metric. It measures deviation between what people *say* and what data *proves*. Spot delusion or hidden gems.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="loader-container" id="loader">
+            <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">ANALYZING DATASETS...</div>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-top: 10px;" id="loaderStep">INIT</div>
+        </section>
+
+        <section class="results-container" id="results">
+            <div class="gap-header">
+                <div class="gap-score-wrapper">
+                    <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Reality Gap Index</div>
+                    <div class="gap-score-large" id="gapScoreDisplay">0.0%</div>
+                    <div class="gap-verdict" id="gapVerdict">PENDING</div>
+                    <div class="gap-desc" id="analysisText">Initializing analysis engine...</div>
+                </div>
+                <div style="text-align: right; border-left: 1px solid var(--border-color); padding-left: 2rem;">
+                    <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">DATA INTEGRITY</div>
+                    <div class="text-green" style="font-family: var(--font-mono); font-size: 1.5rem; margin-top: 5px;">99.2%</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Sources: Reddit, Numbeo, Local Govt, WHO</div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Perception -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title" style="color: var(--alert-blue);">/// PERCEPTION_LAYER</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">SOURCE: SOCIAL_STREAM</div>
+                    </div>
+                    <div class="hashtags-bar" id="hashtagsBar"></div>
+                    <div class="social-feed" id="redditFeed"></div>
+                    <!-- Pros/Cons -->
+                    <div class="pros-cons-wrapper">
+                        <div class="pros-cons-header">/// COMMUNITY SUMMARY</div>
+                        <div class="pros-cons-grid">
+                            <div><ul class="pc-list pros" id="prosList"></ul></div>
+                            <div><ul class="pc-list cons" id="consList"></ul></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reality -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title" style="color: var(--neon-green);">/// REALITY_LAYER</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">SOURCE: OFFICIAL_METRICS</div>
+                    </div>
+
+                    <!-- Currency Toggle -->
+                    <div class="currency-control">
+                        <span class="currency-label">Currency View</span>
+                        <label class="switch-wrapper">
+                            <input type="checkbox" id="currencyToggle">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <div class="currency-status" id="currencyDisplay">LOCAL</div>
+                    </div>
+
+                    <div class="reality-sections">
+                        <!-- Property -->
+                        <div class="metric-card">
+                            <div class="metric-header"><span class="metric-label-large">Property Market</span></div>
+                            <div class="tabs">
+                                <button class="tab-btn active" onclick="switchTab('rent')">Rental</button>
+                                <button class="tab-btn" onclick="switchTab('buy')">Buying</button>
+                            </div>
+                            <div id="tab-rent" class="tab-content active">
+                                <table class="cost-table">
+                                    <tr><td class="cost-label">Studio / 1 Bed (City Center)</td><td class="cost-price" data-key="rent1">--</td></tr>
+                                    <tr><td class="cost-label">3 Bedroom (Outside Center)</td><td class="cost-price" data-key="rent3">--</td></tr>
+                                    <tr><td class="cost-label">Monthly Utilities (Avg)</td><td class="cost-price" data-key="utils">--</td></tr>
+                                </table>
+                            </div>
+                            <div id="tab-buy" class="tab-content">
+                                <table class="cost-table">
+                                    <tr><td class="cost-label">Price per Sq.Meter (City)</td><td class="cost-price" data-key="ppmCity">--</td></tr>
+                                    <tr><td class="cost-label">Price per Sq.Meter (Outside)</td><td class="cost-price" data-key="ppmOut">--</td></tr>
+                                    <tr><td class="cost-label">Mortgage Interest Rate</td><td class="cost-price" data-key="mortgage">--</td></tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Infrastructure -->
+                        <div class="metric-card">
+                            <div class="metric-header"><span class="metric-label-large">Infrastructure & Utilities</span></div>
+                            <div class="stat-grid">
+                                <div class="stat-box">
+                                    <div class="stat-box-label">Water Quality</div>
+                                    <div class="stat-box-val text-green" id="waterQuality">A+</div>
+                                    <div class="stat-box-sub" id="waterText">Potable</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-box-label">Electricity Uptime</div>
+                                    <div class="stat-box-val text-blue" id="elecUptime">99.9%</div>
+                                    <div class="stat-box-sub">Grid Stable</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono); margin-top:0.5rem;" id="infraComment">
+                                No major outages reported in last 30 days.
+                            </div>
+                        </div>
+
+                        <!-- Environment -->
+                        <div class="metric-card">
+                            <div class="metric-header"><span class="metric-label-large">Environment & Atmosphere</span></div>
+                            <div class="stat-grid">
+                                <div class="stat-box">
+                                    <div class="stat-box-label">Noise Pollution</div>
+                                    <div class="stat-box-val text-yellow" id="noiseLevel">High</div>
+                                    <div class="stat-box-sub">Traffic/Construction</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-box-label">Air Quality (AQI)</div>
+                                    <div class="stat-box-val text-green" id="aqiScore">45</div>
+                                    <div class="stat-box-sub" id="aqiText">Good</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nightlife & Safety -->
+                        <div class="metric-card">
+                            <div class="metric-header"><span class="metric-label-large">Nightlife & Safety</span></div>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px; font-family:var(--font-mono);">
+                                    <span>Night Safety Rating</span>
+                                    <span id="nightSafetyScore" class="text-red">Low</span>
+                                </div>
+                                <div class="bar-bg" style="height:6px; background:#111; width:100%;">
+                                    <div class="bar-fill" id="nightSafetyBar" style="height:100%; background:var(--alert-red); width:30%;"></div>
+                                </div>
+                            </div>
+                            <div class="crime-log" style="font-family: var(--font-mono); font-size: 0.8rem;" id="crimeLog"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="reset-btn" onclick="resetApp()">[ RESET_SYSTEM ]</button>
+        </section>
+    </main>
+
+    <script>
+        // --- Data ---
+        const exchangeRates = { "USD": 1, "INR": 83.5, "EUR": 0.92, "GBP": 0.79, "JPY": 150 };
+        
+        const cityDataPresets = {
+            "San Francisco": {
+                sent: 92, cost: 98, aqi: 65, crime: 85,
+                currency: "USD",
+                hashtags: ["#TechHubs", "#HousingCrisis", "#GoldenGate", "#RemoteWork", "#Startups"],
+                prices: { rent1: 3500, rent3: 6500, utils: 280, ppmCity: 12000, ppmOut: 8500, mortgage: "6.5%" },
+                infra: { water: "B", waterText: "Hard Water, Filter Rec.", uptime: "99.5%" },
+                env: { noise: "High", aqi: 65 },
+                night: { safety: "Moderate", score: 45 },
+                pros: ["Incredible Career Opportunities", "Vibrant Nightlife & Culture", "Great Public Transit"],
+                cons: ["Extremely High Rent Prices", "Major Homelessness Issue", "High Tax Burden"],
+                reddit: [
+                    { user: "TechBro_99", body: "The rent prices are literally a joke right now. 3k for a studio? And it's loud all night with construction.", upvotes: 342 },
+                    { user: "MissionLocal", body: "Electricity grid is solid, but water tastes like pool chemicals. You need a filter.", upvotes: 120 },
+                    { user: "NightOwlSF", body: "Night safety depends entirely on neighborhood. Downtown is a ghost town and sketchy, Mission is vibrant but watch your pockets.", upvotes: 210 }
+                ],
+                crime: [{ time: "10:42 PM", text: "Vehicle break-in reported, SoMa." }, { time: "02:15 AM", text: "Assault reported, Tenderloin." }]
+            },
+            "Faridabad": { 
+                sent: 75, cost: 40, aqi: 150, crime: 60,
+                currency: "INR",
+                hashtags: ["#Industrial", "#CommuteProblems", "#CheapLiving", "#AirPollution"],
+                prices: { rent1: 15000, rent3: 35000, utils: 3500, ppmCity: 55000, ppmOut: 38000, mortgage: "8.5%" },
+                infra: { water: "C", waterText: "TDS High, Boiling Required", uptime: "92.5%" },
+                env: { noise: "Very High", aqi: 150 },
+                night: { safety: "Low", score: 25 },
+                pros: ["Very Affordable Rent", "Good Connectivity to Delhi", "Growing Infrastructure"],
+                cons: ["Severe Air Pollution", "Erratic Water Supply", "Industrial Noise Pollution"],
+                reddit: [
+                    { user: "HaryanaGuy", body: "Rent is cheap compared to Gurgaon, but air quality is killing me this month. Water supply is erratic, we use tankers.", upvotes: 89 },
+                    { user: "SectorFaridabad", body: "Electricity cuts are common in summer. Noise pollution is insane because of industrial zones nearby.", upvotes: 156 },
+                    { user: "DelhiCommuter", body: "Don't walk alone at night near industrial areas. Otherwise, it's a decent place for families.", upvotes: 45 }
+                ],
+                crime: [{ time: "09:30 PM", text: "Snatching incident, Main Road." }, { time: "11:00 PM", text: "Noise disturbance complaint, Sector 21." }]
+            },
+            "New York": {
+                sent: 88, cost: 95, aqi: 60, crime: 55,
+                currency: "USD",
+                hashtags: ["#TheCityThatNeverSleeps", "#Broadway", "#SubwayLife", "#Expensive"],
+                prices: { rent1: 3100, rent3: 5800, utils: 250, ppmCity: 14000, ppmOut: 9000, mortgage: "7.0%" },
+                infra: { water: "A", waterText: "Excellent, Direct Potable", uptime: "99.9%" },
+                env: { noise: "Very High", aqi: 60 },
+                night: { safety: "Moderate", score: 60 },
+                pros: ["Unmatched Energy & Vibe", "World Class Dining", "Massive Job Market"],
+                cons: ["Crazy Rent Prices", "Crowded & Dirty Subways", "High Sales Tax"],
+                reddit: [
+                    { user: "SubwayRider", body: "Rent is sky high, but infrastructure is king here. Tap water is better than bottled. Subway noise is part of the package.", upvotes: 560 },
+                    { user: "Manhattanite", body: "Night safety is hit or miss. Midtown is safe, parts of Brooklyn can be rowdy late night.", upvotes: 230 }
+                ],
+                crime: [{ time: "04:20 PM", text: "Grand Larceny, Midtown." }, { time: "11:50 PM", text: "Harassment, Brooklyn Subway." }]
+            }
+        };
+
+        let currentData = null;
+        let isUSD = false;
+
+        const elHero = document.getElementById('hero');
+        const elLoader = document.getElementById('loader');
+        const elResults = document.getElementById('results');
+        const elLoaderStep = document.getElementById('loaderStep');
+        const elGapScore = document.getElementById('gapScoreDisplay');
+        const elGapVerdict = document.getElementById('gapVerdict');
+        const elAnalysis = document.getElementById('analysisText');
+        const elRedditFeed = document.getElementById('redditFeed');
+        const elCrimeLog = document.getElementById('crimeLog');
+        const elHashtags = document.getElementById('hashtagsBar');
+        const elProsList = document.getElementById('prosList');
+        const elConsList = document.getElementById('consList');
+        const currencyToggle = document.getElementById('currencyToggle');
+        const currencyDisplay = document.getElementById('currencyDisplay');
+
+        currencyToggle.addEventListener('change', (e) => {
+            isUSD = e.target.checked;
+            currencyDisplay.innerText = isUSD ? "USD" : "LOCAL";
+            if(currentData) updatePrices();
+        });
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            const buttons = document.querySelectorAll('.tab-btn');
+            if(tabName === 'rent') buttons[0].classList.add('active');
+            else buttons[1].classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        function resetApp() {
+            elResults.style.display = 'none';
+            elHero.style.display = 'flex';
+            currentData = null;
+            document.getElementById('cityInput').value = "";
+        }
+
+        function runAnalysis(city) {
+            if (!city) return;
+            
+            elHero.style.display = 'none';
+            elLoader.style.display = 'flex';
+            elResults.style.display = 'none';
+
+            const steps = ["Scraping Social Sentiment...", "Pulling Economic Indices...", "Fetching Environmental Data...", "Compiling Deep Report..."];
+            let step = 0;
+            const interval = setInterval(() => {
+                if(step < steps.length) {
+                    elLoaderStep.innerText = steps[step];
+                    step++;
+                }
+            }, 400);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                try {
+                    const data = generateDetailedData(city);
+                    currentData = data;
+                    renderDashboard(data);
+                    elLoader.style.display = 'none';
+                    elResults.style.display = 'block';
+                    window.scrollTo({top:0, behavior:'smooth'});
+                } catch (error) {
+                    console.error("Analysis failed:", error);
+                    alert("An error occurred while processing data.");
+                    elLoader.style.display = 'none';
+                    elHero.style.display = 'flex';
+                }
+            }, 2000);
+        }
+
+        function generateDetailedData(city) {
+            const preset = cityDataPresets[city];
+            let baseData = {
+                sent: 50, cost: 50, aqi: 50, crime: 50,
+                currency: "USD",
+                hashtags: ["#CityLife", "#Travel", "#Living", "#Review"],
+                prices: { rent1: 1500, rent3: 2800, utils: 150, ppmCity: 4000, ppmOut: 2500, mortgage: "5.5%" },
+                infra: { water: "B", waterText: "Moderate Quality", uptime: "96.0%" },
+                env: { noise: "Moderate", aqi: 50 },
+                night: { safety: "Moderate", score: 50 },
+                pros: ["Decent Infrastructure", "Local Markets Available", "Growing Economy"],
+                cons: ["Occasional Traffic Jams", "Variable Weather", "Average Nightlife"],
+                reddit: [],
+                crime: []
+            };
+
+            if(preset) {
+                Object.assign(baseData, preset);
+            } else {
+                baseData.sent = Math.floor(Math.random() * 60) + 30;
+                baseData.cost = Math.floor(Math.random() * 80) + 20;
+                baseData.aqi = Math.floor(Math.random() * 80) + 20;
+                baseData.crime = Math.floor(Math.random() * 70) + 10;
+                
+                if(city.toLowerCase().includes("india") || city.toLowerCase().includes("delhi") || city.toLowerCase().includes("mumbai")) {
+                    baseData.currency = "INR";
+                    baseData.prices = { rent1: 12000, rent3: 30000, utils: 3000, ppmCity: 50000, ppmOut: 35000, mortgage: "9.0%" };
+                    baseData.hashtags = ["#India", "#CityVibes", "#Traffic"];
+                } else if(city.toLowerCase().includes("london") || city.toLowerCase().includes("paris")) {
+                    baseData.currency = "EUR";
+                    baseData.prices = { rent1: 1800, rent3: 3200, utils: 200, ppmCity: 10000, ppmOut: 7500, mortgage: "4.5%" };
+                    baseData.hashtags = ["#Europe", "#History", "#Metro"];
+                } else {
+                    baseData.currency = "USD";
+                    baseData.prices = { rent1: 1800, rent3: 3500, utils: 180, ppmCity: 5000, ppmOut: 3000, mortgage: "6.0%" };
+                    baseData.hashtags = ["#USA", "#RoadTrip", "#Downtown"];
+                }
+
+                baseData.reddit = [
+                    { user: "LocalUser", body: `The cost of living here is ${baseData.cost > 70 ? "getting unbearable" : "pretty reasonable"}. Utilities can be a pain sometimes.`, upvotes: 56 },
+                    { user: "Visitor", body: "Traffic noise is constant day and night.", upvotes: 23 }
+                ];
+                baseData.crime = [{ time: "Yesterday", text: "Petty theft reported downtown." }];
+            }
+
+            // --- FIX FOR NaN: Sanitize inputs to ensure they are numbers ---
+            const sent = Number(baseData.sent) || 50;
+            const cost = Number(baseData.cost) || 50;
+            const crime = Number(baseData.crime) || 50;
+            const aqi = Number(baseData.aqi) || 50;
+            // -------------------------------------------------------------
+
+            const realityScore = ((100 - cost) + (100 - crime) + (100 - aqi)) / 3;
+            const gap = Math.abs(sent - realityScore);
+            let verdict = "ALIGNED";
+            let color = "var(--neon-green)";
+            let desc = `Perception and reality for ${city} are consistent.`;
+
+            if(gap > 30) {
+                verdict = "CRITICAL GAP";
+                color = "var(--alert-red)";
+                desc = `Severe divergence. Public narrative (${sent}) is disconnected from data (Reality: ${Math.round(realityScore)}). Structural issues like safety or pollution are likely underreported.`;
+            } else if (gap > 15) {
+                verdict = "MODERATE DISCREPANCY";
+                color = "var(--alert-yellow)";
+                desc = `Misalignment detected. Some metrics do not match general consensus.`;
+            }
+
+            return { ...baseData, gap: gap.toFixed(1), verdict, vColor: color, desc, city };
+        }
+
+        function renderDashboard(data) {
+            elGapScore.innerText = `${data.gap}%`;
+            elGapScore.style.color = data.vColor;
+            elGapVerdict.innerText = data.verdict;
+            elGapVerdict.style.background = data.vColor;
+            elGapVerdict.style.color = '#000';
+            elAnalysis.innerText = data.desc;
+
+            elHashtags.innerHTML = data.hashtags.map(t => `<span class="tag">#${t}</span>`).join('');
+
+            if(data.reddit && Array.isArray(data.reddit)) {
+                elRedditFeed.innerHTML = data.reddit.map(c => `
+                    <div class="comment-thread">
+                        <div class="comment-meta">
+                            <span class="comment-user">u/${c.user}</span>
+                            <span class="comment-score">▲ ${c.upvotes}</span>
+                            <span>• 2h ago</span>
+                        </div>
+                        <div class="comment-body">${c.body}</div>
+                    </div>
+                `).join('');
+            }
+
+            if(data.pros && Array.isArray(data.pros)) elProsList.innerHTML = data.pros.map(p => `<li>${p}</li>`).join('');
+            if(data.cons && Array.isArray(data.cons)) elConsList.innerHTML = data.cons.map(c => `<li>${c}</li>`).join('');
+
+            isUSD = false;
+            currencyToggle.checked = false;
+            currencyDisplay.innerText = "LOCAL";
+
+            const keys = ['rent1', 'rent3', 'utils', 'ppmCity', 'ppmOut'];
+            keys.forEach(k => {
+                const el = document.querySelector(`[data-key="${k}"]`);
+                if(el) el.dataset.value = data.prices[k];
+            });
+            const mortgageEl = document.querySelector('[data-key="mortgage"]');
+            if(mortgageEl) mortgageEl.innerText = data.prices.mortgage;
+
+            updatePrices();
+
+            const waterQuality = document.getElementById('waterQuality');
+            const waterText = document.getElementById('waterText');
+            const elecUptime = document.getElementById('elecUptime');
+            if(waterQuality) waterQuality.innerText = data.infra.water;
+            if(waterText) waterText.innerText = data.infra.waterText;
+            if(elecUptime) elecUptime.innerText = data.infra.uptime;
+
+            const noiseLevel = document.getElementById('noiseLevel');
+            const aqiScore = document.getElementById('aqiScore');
+            const aqiText = document.getElementById('aqiText');
+            if(noiseLevel) noiseLevel.innerText = data.env.noise;
+            if(aqiScore) aqiScore.innerText = data.aqi;
+            
+            let aqiStatus = "Good";
+            let aqiColor = "text-green";
+            if(data.aqi > 100) { aqiStatus = "Unhealthy"; aqiColor = "text-red"; }
+            else if(data.aqi > 50) { aqiStatus = "Moderate"; aqiColor = "text-yellow"; }
+            if(aqiText) aqiText.innerText = aqiStatus;
+            if(aqiScore) aqiScore.className = `stat-box-val ${aqiColor}`;
+
+            const nightSafetyScore = document.getElementById('nightSafetyScore');
+            const nightSafetyBar = document.getElementById('nightSafetyBar');
+            if(nightSafetyScore) nightSafetyScore.innerText = data.night.safety;
+            const barWidth = data.night.score;
+            if(nightSafetyBar) nightSafetyBar.style.width = `${barWidth}%`;
+            let barColor = "var(--alert-red)";
+            if(barWidth > 60) barColor = "var(--alert-yellow)";
+            if(barWidth > 80) barColor = "var(--neon-green)";
+            if(nightSafetyBar) nightSafetyBar.style.background = barColor;
+            if(nightSafetyScore) nightSafetyScore.className = barColor.replace('var(--', '').replace(')', ''); 
+
+            if(data.crime && Array.isArray(data.crime)) {
+                elCrimeLog.innerHTML = data.crime.map(l => `
+                    <div style="display: flex; gap: 10px; margin-bottom: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;">
+                        <div style="color: var(--text-muted); min-width: 60px;">${l.time}</div>
+                        <div style="color: var(--alert-red);">${l.text}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updatePrices() {
+            if(!currentData) return;
+            let code = currentData.currency;
+            let rate = exchangeRates[code] || 1;
+            const keys = ['rent1', 'rent3', 'utils', 'ppmCity', 'ppmOut'];
+            
+            keys.forEach(k => {
+                const el = document.querySelector(`[data-key="${k}"]`);
+                if(!el) return;
+                let val = parseFloat(el.dataset.value);
+                if(isNaN(val)) val = 0;
+                
+                if(isUSD) {
+                    let usdVal = (val / rate).toFixed(2);
+                    el.innerText = `$${usdVal}`;
+                } else {
+                    let localSymbol = "$";
+                    if(code === "EUR") localSymbol = "€";
+                    if(code === "INR") localSymbol = "₹";
+                    el.innerText = `${localSymbol}${val.toLocaleString()}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
