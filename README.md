@@ -1,26 +1,20 @@
-# StartupLens: Destroy My Startup
+# StartUp Lens
 
-A Flask app that generates roast or praise for startup landing pages.
+Simple web app to check startup website and generate:
+- Roast
+- Praise
 
-## What it does
+Built with Python Flask, Gemini API, and Neon Postgres.
 
-- Accepts a startup URL from the homepage.
-- Checks Neon Postgres cache by normalized domain + mode (`roast` / `praise`).
-- If already generated, reuses cached result instantly.
-- If new, fetches landing-page text + external domain enrichment context and calls Gemini.
-- Stores generated result and shows it on a detailed result page.
-- Shows recent results on homepage.
+## How it works
 
-## Stack
+- User puts website URL.
+- App collects website data + some web context.
+- Gemini gives output (roast or praise).
+- Result is saved in Neon DB.
+- If same URL is used again, cached result is shown fast.
 
-- Python + Flask
-- Neon Postgres (via `psycopg`)
-- Gemini API (HTTP call to Generative Language API)
-- Vanilla HTML/CSS templates
-
-## Setup
-
-1. Create venv and install packages:
+## Quick Setup
 
 ```bash
 python3 -m venv .venv
@@ -28,30 +22,20 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Create `.env` from `.env.example` and fill values:
+Create `.env`:
 
 ```env
-GEMINI_API_KEY=...
+GEMINI_API_KEY=your_key
 GEMINI_MODEL=gemini-2.5-flash
-DATABASE_URL=postgresql://...?...sslmode=require
+DATABASE_URL=your_neon_db_url
 DOMAIN_ENRICHMENT_CACHE_HOURS=168
 ```
 
-3. Run:
+Run app:
 
 ```bash
 python app.py
 ```
 
-4. Open:
-
+Open in browser:
 `http://127.0.0.1:5001`
-
-## Neon table
-
-Tables are created automatically on startup:
-
-`roasts(normalized_url + mode UNIQUE, roast_text, request_count, timestamps, ...)`
-`domain_enrichment(domain PK, summary, sources, updated_at)`
-
-This guarantees repeated URL+mode requests do not trigger Gemini again, and domain enrichment is reused.
