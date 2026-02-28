@@ -3,34 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UniversityLens | Before You Take That Degree</title>
+  <title>StartUp Lens</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg-body: #030913;
       --bg-panel: #07101d;
-      --bg-panel-soft: #0b1627;
       --bg-input: #0e1c31;
       --border: #173153;
       --text-primary: #eaf4ff;
       --text-secondary: #8ca6c8;
-      --text-muted: #567195;
+      --text-muted: #557198;
       --blue-main: #32a8ff;
       --blue-bright: #66c8ff;
       --blue-dim: rgba(50, 168, 255, 0.14);
-      --warn: #ffc857;
-      --danger: #ff5f72;
-      --ok: #4ee7ad;
-      --font-main: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --error-bg: #39161f;
+      --error-border: #b94662;
+      --font-main: "Inter", sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+      --font-loading: "Space Mono", monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
 
     body {
+      margin: 0;
       font-family: var(--font-main);
       color: var(--text-primary);
       min-height: 100vh;
@@ -43,1053 +42,427 @@
       background-size: 32px 32px, 32px 32px, 100% 100%, 100% 100%;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      border-bottom: 1px solid var(--border);
-      background: rgba(3, 9, 19, 0.92);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 46px 20px 84px;
     }
 
-    .brand {
+    .kicker {
+      text-align: center;
       font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 1.1rem;
-      letter-spacing: 0.5px;
-    }
-
-    .brand span { color: var(--blue-main); }
-
-    .status-badge {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--blue-bright);
-      border: 1px solid var(--border);
-      padding: 4px 9px;
+      font-size: 12px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-    }
-
-    main { max-width: 1380px; margin: 0 auto; padding: 2rem; }
-
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      padding: 2rem 0 3rem;
+      color: var(--blue-main);
+      margin-bottom: 12px;
     }
 
     h1 {
+      margin: 0 0 16px;
       text-align: center;
-      font-size: 3.1rem;
-      line-height: 1;
+      font-size: clamp(42px, 8vw, 84px);
+      line-height: 0.92;
+      font-weight: 800;
       letter-spacing: -1.5px;
       background: linear-gradient(180deg, #ffffff, #70b9ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
     }
 
     .subtitle {
-      font-family: var(--font-mono);
-      color: var(--text-secondary);
       text-align: center;
-      max-width: 780px;
-      font-size: 0.95rem;
+      color: var(--text-secondary);
+      max-width: 860px;
+      margin: 0 auto 26px;
+      font-family: var(--font-mono);
+      font-size: clamp(14px, 1.6vw, 19px);
+      line-height: 1.45;
     }
 
-    .form-wrap {
-      width: 100%;
-      max-width: 1100px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      padding: 1rem;
+    form {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr auto auto;
-      gap: 0.7rem;
-      margin-top: 0.5rem;
+      grid-template-columns: 1fr auto auto;
+      max-width: 920px;
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      padding: 10px;
+      gap: 10px;
     }
 
-    .text-input,
-    .select-input {
-      width: 100%;
+    input[type="text"], input[type="url"] {
+      border: 1px solid var(--border);
       background: var(--bg-input);
       color: var(--text-primary);
-      border: 1px solid var(--border);
       font-family: var(--font-mono);
-      font-size: 0.9rem;
-      padding: 0.9rem;
+      font-size: clamp(17px, 2vw, 26px);
+      padding: 18px;
       outline: none;
+      min-width: 0;
     }
 
-    .text-input:focus,
-    .select-input:focus { border-color: var(--blue-main); box-shadow: 0 0 0 2px var(--blue-dim); }
-
-    .check-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-      border: 1px solid var(--border);
-      padding: 0.7rem;
-      background: var(--bg-input);
+    input[type="text"]:focus, input[type="url"]:focus {
+      border-color: var(--blue-main);
+      box-shadow: 0 0 0 2px var(--blue-dim);
     }
 
-    .btn {
-      border: none;
-      cursor: pointer;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 0.78rem;
-      letter-spacing: 0.3px;
-      padding: 0 1.2rem;
-      background: var(--blue-main);
-      color: #021225;
-    }
-
-    .meta-source {
-      margin-top: 0.8rem;
-      color: var(--text-secondary);
-      font-size: 0.82rem;
-      font-family: var(--font-mono);
-    }
-
-    .landing-features {
-      width: 100%;
-      max-width: 1100px;
-      margin-top: 1rem;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.8rem;
-    }
-
-    .feature-box {
-      border: 1px solid var(--border);
-      background: var(--bg-panel);
-      padding: 0.9rem;
-      min-height: 150px;
-    }
-
-    .feature-title {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      color: var(--blue-main);
-      margin-bottom: 0.6rem;
-      font-weight: 700;
-    }
-
-    .feature-list {
-      list-style: none;
-      font-size: 0.84rem;
-      line-height: 1.5;
-      color: var(--text-secondary);
-    }
-
-    .feature-list li {
-      margin-bottom: 0.35rem;
-    }
-
-    .loader {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 4rem 0;
-      font-family: var(--font-mono);
-      color: var(--text-secondary);
-    }
-
-    .loader-bar {
-      width: 340px;
-      height: 3px;
-      margin-top: 0.8rem;
-      background: var(--border);
-      overflow: hidden;
-    }
-
-    .loader-fill {
-      height: 100%;
-      width: 35%;
-      background: linear-gradient(90deg, var(--blue-main), var(--blue-bright));
-      animation: pulse 1s infinite alternate;
-    }
-
-    @keyframes pulse { from { width: 12%; } to { width: 88%; } }
-
-    .results { display: none; margin-top: 1.2rem; }
-
-    .top {
-      border: 1px solid var(--border);
-      background: var(--bg-panel);
-      padding: 1.7rem;
-      margin-bottom: 1.4rem;
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .score-label {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-    }
-
-    .score-big {
-      font-family: var(--font-mono);
-      font-size: 4.8rem;
-      color: var(--blue-bright);
-      line-height: 0.9;
-      margin-top: 0.1rem;
-    }
-
-    .verdict {
-      display: inline-block;
-      margin-top: 0.45rem;
+    button {
+      border: 1px solid var(--blue-main);
       background: var(--blue-main);
       color: #03101f;
       font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-size: clamp(14px, 1.6vw, 18px);
       font-weight: 700;
-      font-size: 1rem;
-      padding: 5px 12px;
+      padding: 0 22px;
+      cursor: pointer;
     }
 
-    .top-text {
-      max-width: 600px;
-      margin-top: 0.7rem;
+    .mode-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      overflow: hidden;
+    }
+
+    .mode-btn {
+      border: 0;
+      background: transparent;
       color: var(--text-secondary);
       font-family: var(--font-mono);
-      font-size: 0.82rem;
-      line-height: 1.45;
-      border-left: 2px solid var(--border);
-      padding-left: 0.9rem;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      padding: 0 14px;
+      cursor: pointer;
     }
 
-    .integrity {
-      border-left: 1px solid var(--border);
-      padding-left: 1.2rem;
-      text-align: right;
-      font-family: var(--font-mono);
-      min-width: 280px;
-    }
-
-    .integrity .val { font-size: 1.7rem; color: var(--ok); margin-top: 0.3rem; }
-    .integrity .src { color: var(--text-secondary); font-size: 0.78rem; margin-top: 0.35rem; line-height: 1.4; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1.3fr;
-      gap: 1.4rem;
-    }
-
-    .panel { border: 1px solid var(--border); background: var(--bg-panel); }
-
-    .panel-head {
-      padding: 0.95rem 1.2rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.7rem;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .panel-title {
-      font-family: var(--font-mono);
-      font-size: 0.88rem;
+    .mode-btn.active {
+      background: var(--blue-main);
+      color: #03101f;
       font-weight: 700;
-      text-transform: uppercase;
-      color: var(--blue-main);
-    }
-
-    .panel-sub {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      text-transform: uppercase;
-    }
-
-    .currency-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      margin-left: auto;
-    }
-
-    .currency-wrap span {
-      font-size: 0.7rem;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .currency-wrap select {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-      padding: 0.35rem 0.45rem;
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-    }
-
-    .hashtags {
-      border-bottom: 1px solid var(--border);
-      padding: 0.75rem 1.2rem;
-      font-family: var(--font-mono);
-      color: var(--blue-bright);
-      display: flex;
-      gap: 0.65rem;
-      overflow-x: auto;
-      font-size: 0.74rem;
-    }
-
-    .feed { padding: 1.2rem; max-height: 690px; overflow-y: auto; }
-
-    .thread {
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 1.15rem;
-      padding-bottom: 1rem;
     }
 
     .meta {
-      display: flex;
-      gap: 0.6rem;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 0.45rem;
-    }
-
-    .user { color: var(--blue-main); font-weight: 700; }
-
-    .body {
-      line-height: 1.55;
-      font-size: 0.95rem;
-      color: var(--text-primary);
-    }
-
-    .summary {
-      border-top: 1px solid var(--border);
-      padding: 1.2rem;
-      background: var(--bg-panel-soft);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .sum-head {
-      font-family: var(--font-mono);
-      font-size: 0.76rem;
-      color: var(--text-muted);
-      margin-bottom: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .sum-list { list-style: none; }
-    .sum-list li {
-      margin-bottom: 0.5rem;
-      padding-left: 1.1rem;
-      position: relative;
-      font-size: 0.88rem;
-      line-height: 1.4;
-    }
-
-    .sum-list.pro li::before,
-    .sum-list.con li::before {
-      position: absolute;
-      left: 0;
-      top: 0;
-      font-family: var(--font-mono);
-      font-weight: 700;
-    }
-
-    .sum-list.pro li::before { content: '+'; color: var(--ok); }
-    .sum-list.con li::before { content: '-'; color: var(--danger); }
-
-    .card { border-bottom: 1px solid var(--border); padding: 1.2rem; }
-    .card:last-child { border-bottom: none; }
-
-    .card-title {
-      font-family: var(--font-mono);
-      font-size: 1rem;
-      margin-bottom: 0.9rem;
-      font-weight: 700;
-    }
-
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-    }
-
-    .table td {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 7px 0;
-      vertical-align: top;
-    }
-
-    .table tr:last-child td { border-bottom: none; }
-    .table .k { color: var(--text-secondary); }
-    .table .v { text-align: right; color: var(--blue-bright); white-space: nowrap; }
-
-    .kpis {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
-    }
-
-    .kpi {
-      border: 1px solid var(--border);
-      background: var(--bg-input);
-      padding: 0.85rem;
-    }
-
-    .kpi .l {
-      text-transform: uppercase;
-      color: var(--text-muted);
-      font-size: 0.68rem;
-      margin-bottom: 0.45rem;
-      font-family: var(--font-mono);
-    }
-
-    .kpi .v {
-      font-size: 1.2rem;
-      font-family: var(--font-mono);
-      font-weight: 700;
-      color: var(--blue-bright);
-    }
-
-    .pill-row {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      border: 1px solid var(--border);
-      background: var(--bg-input);
-      padding: 0.4rem 0.55rem;
-      font-size: 0.76rem;
-      font-family: var(--font-mono);
-      color: var(--text-secondary);
-    }
-
-    .three-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.9rem;
-    }
-
-    .insight-box {
-      border: 1px solid var(--border);
-      background: var(--bg-input);
-      padding: 0.8rem;
-    }
-
-    .insight-title {
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-
-    .insight-list { list-style: none; font-size: 0.84rem; line-height: 1.45; }
-    .insight-list li { margin-bottom: 0.38rem; }
-
-    .actions {
-      display: flex;
-      justify-content: center;
-      gap: 0.7rem;
-      margin-top: 1.6rem;
-    }
-
-    .error-panel {
-      display: none;
+      margin: 18px auto 50px;
       max-width: 920px;
-      margin: 1.2rem auto 0;
-      border: 1px solid var(--danger);
-      background: rgba(255, 95, 114, 0.08);
-      padding: 1rem 1.1rem;
-      font-family: var(--font-mono);
-    }
-
-    .error-title {
-      color: var(--danger);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
-    }
-
-    .error-msg {
-      color: #ffd6dc;
-      font-size: 0.82rem;
-      line-height: 1.45;
-      margin-bottom: 0.8rem;
-    }
-
-    .error-actions {
       display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .ghost {
-      background: transparent;
-      border: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       color: var(--text-secondary);
-      padding: 0.8rem 1.4rem;
       font-family: var(--font-mono);
-      cursor: pointer;
-      text-transform: uppercase;
-      font-size: 0.76rem;
+      font-size: 14px;
     }
 
-    .ghost:hover { border-color: var(--blue-main); color: var(--blue-main); }
+    .url-hint {
+      max-width: 920px;
+      margin: 10px auto 24px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
 
-    @media (max-width: 1100px) {
-      .form-wrap { grid-template-columns: 1fr; }
+    .url-hint strong {
+      color: var(--blue-bright);
+      font-weight: 700;
+    }
+
+    .avatars { font-size: 18px; letter-spacing: 2px; }
+    .counter strong { color: var(--blue-bright); font-size: 1.1em; }
+
+    .recent-label {
+      text-align: center;
+      font-family: var(--font-mono);
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      font-size: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      padding: 14px;
+      text-decoration: none;
+      color: inherit;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .card:hover {
+      border-color: var(--blue-main);
+      transform: translateY(-2px);
+    }
+
+    .domain {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #dceeff;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .teaser {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .hits {
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .error {
+      max-width: 920px;
+      margin: 0 auto 18px;
+      border: 1px solid var(--error-border);
+      background: var(--error-bg);
+      color: #ffd4df;
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 22px;
+      font-size: 13px;
+    }
+
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 999;
+      background:
+        radial-gradient(circle at 20% 5%, rgba(32, 102, 167, 0.35), transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(16, 57, 108, 0.35), transparent 35%),
+        var(--bg-body);
+      color: var(--text-primary);
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      padding: 24px;
+    }
+
+    .loading-content {
+      width: min(760px, 100%);
+      padding-left: 6px;
+    }
+
+    .spinner {
+      width: 64px;
+      height: 64px;
+      margin: 0 0 22px;
+      border-radius: 50%;
+      border: 6px solid #23476f;
+      border-top-color: var(--blue-main);
+      animation: spin 0.95s linear infinite;
+    }
+
+    .loading-title {
+      font-family: var(--font-loading);
+      font-size: clamp(28px, 5vw, 60px);
+      line-height: 1.12;
+      letter-spacing: 0.4px;
+      margin-bottom: 8px;
+    }
+
+    .loading-sub {
+      color: var(--text-secondary);
+      margin: 0;
+      font-family: var(--font-main);
+      font-size: clamp(18px, 2.4vw, 46px);
+      line-height: 1.35;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      input[type="text"], input[type="url"] { padding: 16px; }
+    }
+
+    @media (max-width: 700px) {
+      form { grid-template-columns: 1fr; }
+      button { padding: 14px; }
+      .mode-toggle { height: 44px; }
       .grid { grid-template-columns: 1fr; }
-      .top { flex-direction: column; }
-      .integrity { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 1rem; text-align: left; }
-      .summary { grid-template-columns: 1fr; }
-      .three-col { grid-template-columns: 1fr; }
-      .landing-features { grid-template-columns: 1fr; }
-      h1 { font-size: 2.2rem; }
-      .score-big { font-size: 3.2rem; }
-      .panel-head { flex-wrap: wrap; }
-      .currency-wrap { margin-left: 0; }
+      .meta { flex-direction: column; align-items: flex-start; }
+      .loading-sub { font-size: clamp(20px, 5vw, 30px); }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">UNIVERSITY://LENS <span>_DEGREE_INTEL</span></div>
-    <div class="status-badge">SYS: ONLINE</div>
-  </header>
 
-  <main>
-    <section class="hero" id="hero">
-      <h1>BEFORE YOU TAKE<br>THAT DEGREE</h1>
-      <p class="subtitle">Analyze objective outcomes and hidden student sentiment for any university + degree.</p>
-
-      <form class="form-wrap" id="analyzeForm" autocomplete="off">
-        <input id="university" class="text-input" type="text" placeholder="> UNIVERSITY_NAME" required autocomplete="off" />
-        <input id="degree" class="text-input" type="text" placeholder="> DEGREE_PROGRAM" required autocomplete="off" />
-        <input id="country" class="text-input" type="text" placeholder="> COUNTRY_HINT (OPTIONAL)" autocomplete="off" />
-        <label class="check-wrap"><input id="international" type="checkbox" autocomplete="off" /> International applicant?</label>
-        <button class="btn" type="submit">Execute</button>
-      </form>
-
-      <p class="meta-source">Processing pipeline: Gemini AI + Reddit signal interpretation + AI outcome modeling.</p>
-      <p class="meta-source">Country hint identifies university location. International applicant is your status and is separate.</p>
-
-      <section class="error-panel" id="errorPanel">
-        <div class="error-title" id="errorTitle">Analysis Error</div>
-        <div class="error-msg" id="errorMessage"></div>
-        <div class="error-actions">
-          <button class="ghost" id="retryBtn" type="button">Retry</button>
-          <button class="ghost" id="dismissErrorBtn" type="button">Dismiss</button>
-        </div>
-      </section>
-
-      <section class="landing-features">
-        <article class="feature-box">
-          <div class="feature-title">Objective Signals</div>
-          <ul class="feature-list">
-            <li>Salary distribution (P10-P90)</li>
-            <li>Debt burden + average debt</li>
-            <li>Dropout rate + time to employment</li>
-            <li>Industry placement distribution</li>
-            <li>Visa success (for international path)</li>
-          </ul>
-        </article>
-        <article class="feature-box">
-          <div class="feature-title">Subjective Signals</div>
-          <ul class="feature-list">
-            <li>Reddit-style complaint threads</li>
-            <li>Burnout culture signals</li>
-            <li>Professor reputation clusters</li>
-            <li>Social life density indicator</li>
-            <li>Hidden administrative friction</li>
-          </ul>
-        </article>
-        <article class="feature-box">
-          <div class="feature-title">Decision Outputs</div>
-          <ul class="feature-list">
-            <li>ROI score and decision gap</li>
-            <li>Academic pressure index</li>
-            <li>Social isolation risk</li>
-            <li>Career outcome probability</li>
-            <li>Role-level salary and AI insights</li>
-          </ul>
-        </article>
-      </section>
-    </section>
-
-    <section class="loader" id="loader">
-      <div id="loaderText">Building UniversityLens report...</div>
-      <div class="loader-bar"><div class="loader-fill"></div></div>
-    </section>
-
-    <section class="results" id="results">
-      <div id="reportCapture">
-        <div class="top">
-          <div>
-            <div class="score-label">Decision Gap Index</div>
-            <div class="score-big" id="gapScore">0%</div>
-            <div class="verdict" id="gapVerdict">PENDING</div>
-            <div class="top-text" id="topSummary">Run an analysis to load the full report.</div>
-          </div>
-          <div class="integrity">
-            <div class="score-label">Data Integrity</div>
-            <div class="val">99.1%</div>
-            <div class="src" id="sourceLine">Sources: Reddit + Gemini AI + Public Signals</div>
-            <div class="src" id="collegeMeta"></div>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="panel">
-            <div class="panel-head">
-              <div class="panel-title">/// Perception Layer</div>
-              <div class="panel-sub">Source: Reddit + AI Threads</div>
-            </div>
-            <div class="hashtags" id="hashtags"></div>
-            <div class="feed" id="redditFeed"></div>
-            <div class="summary">
-              <div>
-                <div class="sum-head">Burnout Culture Signals</div>
-                <ul class="sum-list pro" id="burnoutList"></ul>
-              </div>
-              <div>
-                <div class="sum-head">Hidden Admin Issues</div>
-                <ul class="sum-list con" id="adminList"></ul>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-head">
-              <div class="panel-title">/// Outcome Layer</div>
-              <div class="panel-sub">Objective Metrics + Gemini Synthesis</div>
-              <div class="currency-wrap">
-                <span>Currency View</span>
-                <select id="currencySelect"></select>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Graduate Salary Distribution</div>
-              <table class="table" id="salaryTable"></table>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Top Role Salaries</div>
-              <table class="table" id="roleTable"></table>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Core Outcomes</div>
-              <div class="kpis">
-                <div class="kpi"><div class="l">Debt Burden Index</div><div class="v" id="debtKpi">0</div></div>
-                <div class="kpi"><div class="l">Dropout Rate</div><div class="v" id="dropoutKpi">0%</div></div>
-                <div class="kpi"><div class="l">Time to Employment</div><div class="v" id="timeKpi">0 mo</div></div>
-                <div class="kpi"><div class="l">Visa Success</div><div class="v" id="visaKpi">N/A</div></div>
-                <div class="kpi"><div class="l">Annual Tuition</div><div class="v" id="tuitionKpi">-</div></div>
-                <div class="kpi"><div class="l">Annual Living Cost</div><div class="v" id="livingKpi">-</div></div>
-                <div class="kpi"><div class="l">Avg Debt at Graduation</div><div class="v" id="gradDebtKpi">-</div></div>
-                <div class="kpi"><div class="l">Local Currency</div><div class="v" id="localCurrencyKpi">-</div></div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Industry Placement Distribution</div>
-              <table class="table" id="industryTable"></table>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Final Output Scores</div>
-              <div class="kpis">
-                <div class="kpi"><div class="l">ROI Score</div><div class="v" id="roiKpi">0</div></div>
-                <div class="kpi"><div class="l">Academic Pressure</div><div class="v" id="pressureKpi">0</div></div>
-                <div class="kpi"><div class="l">Isolation Risk</div><div class="v" id="isolationKpi">0</div></div>
-                <div class="kpi"><div class="l">Career Outcome Prob.</div><div class="v" id="careerKpi">0%</div></div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">Professor Reputation + Social Density</div>
-              <div class="pill-row" id="profPills"></div>
-              <div style="margin-top: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.82rem;">
-                Social life density: <span id="socialDensity" style="color: var(--blue-bright)">-</span>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-title">AI Detailed Insights</div>
-              <div class="three-col">
-                <div class="insight-box">
-                  <div class="insight-title">Overall</div>
-                  <ul class="insight-list" id="overallInsights"></ul>
-                </div>
-                <div class="insight-box">
-                  <div class="insight-title">Risks</div>
-                  <ul class="insight-list" id="riskInsights"></ul>
-                </div>
-                <div class="insight-box">
-                  <div class="insight-title">Opportunities</div>
-                  <ul class="insight-list" id="opportunityInsights"></ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <main class="wrap">
+    <div class="kicker" id="kicker-text">Roast Mode</div>
+    <h1>StartUp Lens</h1>
+    <p class="subtitle" id="subtitle-text">Drop your URL. We’ll find every fragile claim on your landing page and use it against you.</p>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+    <form id="destroy-form" method="post" action="/destroy">
+      <input type="hidden" name="mode" id="mode-input" value="roast" />
+      <input type="text" name="url" placeholder="www.startup.com" autocomplete="off" required />
+      <div class="mode-toggle" role="group" aria-label="Result mode">
+        <button type="button" class="mode-btn active" data-mode="roast">Roast</button>
+        <button type="button" class="mode-btn" data-mode="praise">Praise</button>
       </div>
+      <button type="submit" id="submit-btn">Destroy It</button>
+    </form>
+    <div class="url-hint">You can paste <strong>startup.com</strong>, <strong>www.startup.com</strong>, or full URL. We auto-convert to HTTPS.</div>
+    <div class="meta">
+      <div class="avatars">☠️ 🥷 👻 🤖 👹 💀 😈 🐍</div>
+      <div class="counter"><strong>+{{ total_destroyed }}</strong> <span id="counter-copy">results generated</span></div>
+    </div>
 
-      <div class="actions">
-        <button class="ghost" id="exportBtn" type="button">Export PNG</button>
-        <button class="ghost" id="resetBtn" type="button">Reset</button>
-      </div>
-    </section>
+
+    <div class="recent-label" id="recent-label">Recent Results</div>
+    {% if recent %}
+      <section class="grid">
+        {% for row in recent %}
+          <a class="card" href="{{ url_for('result_detail', mode=row.mode, slug=row.slug) }}">
+            <div>
+              <div class="domain">{{ row.display_domain }}</div>
+              <p class="hits" style="margin:0 0 6px 0;">{{ row.mode|upper }}</p>
+              <p class="teaser">{{ row.teaser }}</p>
+            </div>
+            <div class="hits">{{ row.request_count }} total hits</div>
+          </a>
+        {% endfor %}
+      </section>
+    {% else %}
+      <p class="empty" id="empty-msg">No roasts yet. Break the silence.</p>
+    {% endif %}
   </main>
 
+  <div class="loading-screen" id="loading-screen" aria-live="polite">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div class="loading-title" id="loading-title">Pulling up startup...</div>
+      <p class="loading-sub" id="loading-sub">Reading every word. This won’t be pretty.</p>
+    </div>
+  </div>
+
   <script>
-    const form = document.getElementById('analyzeForm');
-    const hero = document.getElementById('hero');
-    const loader = document.getElementById('loader');
-    const results = document.getElementById('results');
-    const loaderText = document.getElementById('loaderText');
-
-    const gapScore = document.getElementById('gapScore');
-    const gapVerdict = document.getElementById('gapVerdict');
-    const topSummary = document.getElementById('topSummary');
-    const sourceLine = document.getElementById('sourceLine');
-    const collegeMeta = document.getElementById('collegeMeta');
-
-    const hashtags = document.getElementById('hashtags');
-    const redditFeed = document.getElementById('redditFeed');
-    const burnoutList = document.getElementById('burnoutList');
-    const adminList = document.getElementById('adminList');
-
-    const salaryTable = document.getElementById('salaryTable');
-    const roleTable = document.getElementById('roleTable');
-    const debtKpi = document.getElementById('debtKpi');
-    const dropoutKpi = document.getElementById('dropoutKpi');
-    const timeKpi = document.getElementById('timeKpi');
-    const visaKpi = document.getElementById('visaKpi');
-    const tuitionKpi = document.getElementById('tuitionKpi');
-    const livingKpi = document.getElementById('livingKpi');
-    const gradDebtKpi = document.getElementById('gradDebtKpi');
-    const localCurrencyKpi = document.getElementById('localCurrencyKpi');
-    const industryTable = document.getElementById('industryTable');
-
-    const roiKpi = document.getElementById('roiKpi');
-    const pressureKpi = document.getElementById('pressureKpi');
-    const isolationKpi = document.getElementById('isolationKpi');
-    const careerKpi = document.getElementById('careerKpi');
-
-    const profPills = document.getElementById('profPills');
-    const socialDensity = document.getElementById('socialDensity');
-    const overallInsights = document.getElementById('overallInsights');
-    const riskInsights = document.getElementById('riskInsights');
-    const opportunityInsights = document.getElementById('opportunityInsights');
-
-    const currencySelect = document.getElementById('currencySelect');
-    const exportBtn = document.getElementById('exportBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const countryInput = document.getElementById('country');
-    const internationalInput = document.getElementById('international');
-    const errorPanel = document.getElementById('errorPanel');
-    const errorTitle = document.getElementById('errorTitle');
-    const errorMessage = document.getElementById('errorMessage');
-    const retryBtn = document.getElementById('retryBtn');
-    const dismissErrorBtn = document.getElementById('dismissErrorBtn');
-
-    let currentReport = null;
-    let touchedInternational = false;
-
-    internationalInput.checked = false;
-    internationalInput.addEventListener('change', () => {
-      touchedInternational = true;
-    });
-
-    countryInput.addEventListener('input', () => {
-      if (!touchedInternational && countryInput.value.trim()) {
-        internationalInput.checked = false;
+    const form = document.getElementById("destroy-form");
+    const loadingScreen = document.getElementById("loading-screen");
+    const loadingTitle = document.getElementById("loading-title");
+    const loadingSub = document.getElementById("loading-sub");
+    const modeInput = document.getElementById("mode-input");
+    const modeButtons = Array.from(document.querySelectorAll(".mode-btn"));
+    const kickerText = document.getElementById("kicker-text");
+    const subtitleText = document.getElementById("subtitle-text");
+    const submitBtn = document.getElementById("submit-btn");
+    const recentLabel = document.getElementById("recent-label");
+    const emptyMsg = document.getElementById("empty-msg");
+    const modeCopy = {
+      roast: {
+        kicker: "Roast Mode",
+        subtitle: "Drop your URL. We’ll find every fragile claim on your landing page and use it against you.",
+        button: "Destroy It",
+        recent: "Recently Roasted",
+        empty: "No roasts yet. Break the silence.",
+        loadingTitle: (d) => `Pulling up ${d}...`,
+        hints: [
+          "Reading every word. This won’t be pretty.",
+          "It takes a second to gather enough ammo."
+        ]
+      },
+      praise: {
+        kicker: "Praise Mode",
+        subtitle: "Drop your URL. We’ll find what your landing page does right and turn it into clear strengths.",
+        button: "Praise It",
+        recent: "Recently Praised",
+        empty: "No praises yet. Be the first.",
+        loadingTitle: (d) => `Reviewing ${d}...`,
+        hints: [
+          "Collecting strengths and signals.",
+          "Looking for what this startup gets right."
+        ]
       }
+    };
+
+    function getDomainLike(input) {
+      const value = (input || "").trim().toLowerCase();
+      if (!value) return "startup";
+      return value.replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "") || "startup";
+    }
+
+    function startLoading(domain) {
+      const mode = modeInput.value === "praise" ? "praise" : "roast";
+      const cfg = modeCopy[mode];
+      loadingScreen.style.display = "flex";
+      loadingTitle.textContent = cfg.loadingTitle(domain);
+      loadingSub.textContent = cfg.hints[Math.floor(Math.random() * cfg.hints.length)];
+    }
+
+    function applyModeCopy(mode) {
+      const cfg = modeCopy[mode] || modeCopy.roast;
+      kickerText.textContent = cfg.kicker;
+      subtitleText.textContent = cfg.subtitle;
+      submitBtn.textContent = cfg.button;
+      recentLabel.textContent = cfg.recent;
+      if (emptyMsg) emptyMsg.textContent = cfg.empty;
+    }
+
+    modeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        modeInput.value = btn.dataset.mode;
+        modeButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        applyModeCopy(modeInput.value);
+      });
     });
+    applyModeCopy("roast");
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideError();
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = form.querySelector('input[name="url"]');
+      const url = (input.value || "").trim();
+      if (!url) return;
 
-      const university = document.getElementById('university').value.trim();
-      const degree = document.getElementById('degree').value.trim();
-      const country = document.getElementById('country').value.trim();
-      const international = document.getElementById('international').checked;
-      if (!university || !degree) return;
-
-      hero.style.display = 'none';
-      results.style.display = 'none';
-      loader.style.display = 'flex';
-
-      const steps = [
-        'Pulling Reddit signal traces...',
-        'Running Gemini synthesis...',
-        'Computing objective outcome probabilities...',
-        'Generating decision report...'
-      ];
-      let idx = 0;
-      loaderText.textContent = steps[idx];
-      const ticker = setInterval(() => {
-        idx = (idx + 1) % steps.length;
-        loaderText.textContent = steps[idx];
-      }, 600);
-
+      startLoading(getDomainLike(url));
       try {
-        const res = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ university, degree, country, international })
+        const response = await fetch("/api/destroy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, mode: modeInput.value || "roast" })
         });
-
-        const payload = await res.json();
-        if (!res.ok) {
-          throw new Error(payload.error || 'Analysis failed');
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          const message = encodeURIComponent(data.error || "Request failed.");
+          window.location.href = "/?error=" + message;
+          return;
         }
-
-        currentReport = payload;
-        setupCurrencySelector(payload);
-        render(payload);
-
-        clearInterval(ticker);
-        loader.style.display = 'none';
-        results.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.location.href = data.redirect_url;
       } catch (err) {
-        clearInterval(ticker);
-        loader.style.display = 'none';
-        hero.style.display = 'flex';
-        showError(String(err.message || err));
+        window.location.href = "/?error=" + encodeURIComponent("Network error while generating roast.");
       }
-    });
-
-    retryBtn.addEventListener('click', () => {
-      hideError();
-      form.requestSubmit();
-    });
-
-    dismissErrorBtn.addEventListener('click', hideError);
-
-    currencySelect.addEventListener('change', () => {
-      if (currentReport) render(currentReport);
-    });
-
-    function setupCurrencySelector(report) {
-      const local = report.local_currency || 'USD';
-      const supported = report.supported_currencies || [];
-      const options = ['LOCAL', 'USD', ...supported.filter((x) => x !== 'USD' && x !== local)];
-
-      currencySelect.innerHTML = options.map((code) => {
-        const label = code === 'LOCAL' ? `LOCAL (${local})` : code;
-        return `<option value="${code}">${label}</option>`;
-      }).join('');
-      currencySelect.value = 'LOCAL';
-    }
-
-    function metricColor(v) {
-      if (v >= 75) return 'var(--ok)';
-      if (v >= 55) return 'var(--warn)';
-      return 'var(--danger)';
-    }
-
-    function currentCurrencyCode(report) {
-      const selected = currencySelect.value || 'LOCAL';
-      return selected === 'LOCAL' ? (report.local_currency || 'USD') : selected;
-    }
-
-    function convertAmount(report, amount) {
-      const numeric = Number(amount || 0);
-      const base = report.local_currency || 'USD';
-      const target = currentCurrencyCode(report);
-      if (target === base) return numeric;
-
-      const rates = report.fx_rates || {};
-      const factor = Number(rates[target] || 0);
-      if (!factor) return null;
-      return numeric * factor;
-    }
-
-    function formatAmount(report, amount) {
-      const converted = convertAmount(report, amount);
-      const curr = currentCurrencyCode(report);
-      if (converted == null) return `N/A (${curr})`;
-      try {
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: curr,
-          maximumFractionDigits: 0
-        }).format(converted);
-      } catch (_) {
-        return `${curr} ${Math.round(converted).toLocaleString()}`;
-      }
-    }
-
-    function render(report) {
-      const out = report.output || {};
-      gapScore.textContent = `${out.decision_gap || 0}%`;
-      gapVerdict.textContent = out.verdict || 'ALIGNED';
-      topSummary.textContent = out.summary || 'No summary available.';
-
-      const gap = Number(out.decision_gap || 0);
-      const verdictBg = gap >= 30 ? 'var(--danger)' : (gap >= 18 ? 'var(--warn)' : 'var(--blue-main)');
-      gapVerdict.style.background = verdictBg;
-      gapVerdict.style.color = '#03101f';
-      gapScore.style.color = verdictBg;
-
-      sourceLine.textContent = `Sources: ${(report.sources || []).join(', ') || 'Gemini + Reddit + AI signals'}`;
-      collegeMeta.textContent = `${escapeHtml(report.university || '')} | ${escapeHtml(report.degree || '')} | ${escapeHtml(report.country || 'Country inferred by AI')}`;
-
-      const tags = [report.university, report.degree, 'RedditSignals', 'GeminiAI', 'DegreeRisk'];
-      hashtags.innerHTML = tags.map((t) => `<span>#${String(t || '').replace(/\s+/g, '')}</span>`).join('');
-
-      const threads = report.subjective?.reddit_threads || [];
-      redditFeed.innerHTML = threads.map((t) => `
-        <div class="thread">
-          <div class="meta">
-            <span class="user">u/${escapeHtml(t.user || 'anon')}</span>
-            <span>▲ ${Number(t.upvotes || 0)}</span>
-            <span>• ${escapeHtml(t.age || 'recent')}</span>
-          </div>
-          <div class="body">${escapeHtml(t.text || '')}</div>
-        </div>
-      `).join('');
-
-      burnoutList.innerHTML = (report.subjective?.burnout_culture_signals || []).map((s) => `<li>${escapeHtml(s)}</li>`).join('');
-      adminList.innerHTML = (report.subjective?.hidden_admin_issues || []).map((s) => `<li>${escapeHtml(s)}</li>`).join('');
-
-      const salaries = report.objective?.salary_distribution || [];
-      salaryTable.innerHTML = salaries.map((row) => `
-        <tr>
-          <td class="k">${escapeHtml(row.band || '')}</td>
-          <td class="v">${formatAmount(report, row.amount)}</td>
-        </tr>
-      `).join('');
-
-      const roles = report.objective?.top_roles || [];
-      roleTable.innerHTML = roles.map((r) => `
-        <tr>
-          <td class="k">${escapeHtml(r.role || '')}<br><span style="font-size:0.72rem;color:var(--text-muted)">${escapeHtml(r.hiring_signal || '')} hiring signal</span></td>
-          <td class="v">P25 ${formatAmount(report, r.p25)}<br>P50 ${formatAmount(report, r.median)}<br>P75 ${formatAmount(report, r.p75)}</td>
-        </tr>
-      `).join('');
-
-      debtKpi.textContent = Number(report.objective?.debt_burden_index || 0);
-      debtKpi.style.color = metricColor(100 - Number(report.objective?.debt_burden_index || 0));
-      dropoutKpi.textContent = `${Number(report.objective?.dropout_rate_pct || 0)}%`;
-      timeKpi.textContent = `${Number(report.objective?.time_to_employment_months || 0)} mo`;
-      visaKpi.textContent = report.objective?.visa_success_rate_pct == null ? 'N/A' : `${Number(report.objective?.visa_success_rate_pct)}%`;
-
-      tuitionKpi.textContent = formatAmount(report, report.objective?.annual_tuition || 0);
-      livingKpi.textContent = formatAmount(report, report.objective?.annual_living_cost || 0);
-      gradDebtKpi.textContent = formatAmount(report, report.objective?.avg_debt_at_graduation || 0);
-      localCurrencyKpi.textContent = report.local_currency || '-';
-
-      const industry = report.objective?.industry_placement || [];
-      industryTable.innerHTML = industry.map((row) => `
-        <tr>
-          <td class="k">${escapeHtml(row.industry || '')}</td>
-          <td class="v">${Number(row.pct || 0)}%</td>
-        </tr>
-      `).join('');
-
-      roiKpi.textContent = Number(out.roi_score || 0);
-      pressureKpi.textContent = Number(out.academic_pressure_index || 0);
-      isolationKpi.textContent = Number(out.social_isolation_risk || 0);
-      careerKpi.textContent = `${Number(out.career_outcome_probability || 0)}%`;
-
-      roiKpi.style.color = metricColor(Number(out.roi_score || 0));
-      pressureKpi.style.color = metricColor(100 - Number(out.academic_pressure_index || 0));
-      isolationKpi.style.color = metricColor(100 - Number(out.social_isolation_risk || 0));
-      careerKpi.style.color = metricColor(Number(out.career_outcome_probability || 0));
-
-      profPills.innerHTML = (report.subjective?.professor_reputation_clusters || []).map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join('');
-      socialDensity.textContent = report.subjective?.social_life_density || '-';
-
-      overallInsights.innerHTML = (report.insights?.overall || []).map((x) => `<li>${escapeHtml(x)}</li>`).join('');
-      riskInsights.innerHTML = (report.insights?.risks || []).map((x) => `<li>${escapeHtml(x)}</li>`).join('');
-      opportunityInsights.innerHTML = (report.insights?.opportunities || []).map((x) => `<li>${escapeHtml(x)}</li>`).join('');
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function showError(rawMessage) {
-      const msg = String(rawMessage || 'Unknown error');
-      let title = 'Analysis Error';
-      let body = msg;
-
-      if (msg.toLowerCase().includes('rate limit')) {
-        title = 'Rate Limit Reached (429)';
-        body = 'This app currently runs on a free-tier AI quota, so 429 rate-limit errors can happen during peak usage. Please cooperate by waiting a bit and retrying after 30-90 seconds.';
-      } else if (msg.toLowerCase().includes('authentication')) {
-        title = 'Authentication Error';
-        body = 'Gemini API key is invalid or not authorized. Check GEMINI_API_KEY in .env.';
-      } else if (msg.toLowerCase().includes('network')) {
-        title = 'Network Error';
-        body = 'Could not reach the AI provider. Check internet connectivity and retry.';
-      }
-
-      errorTitle.textContent = title;
-      errorMessage.textContent = body;
-      errorPanel.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function hideError() {
-      errorPanel.style.display = 'none';
-      errorTitle.textContent = 'Analysis Error';
-      errorMessage.textContent = '';
-    }
-
-    resetBtn.addEventListener('click', () => {
-      hideError();
-      results.style.display = 'none';
-      loader.style.display = 'none';
-      hero.style.display = 'flex';
-      currentReport = null;
-      touchedInternational = false;
-      internationalInput.checked = false;
-      form.reset();
-      currencySelect.innerHTML = '';
-    });
-
-    exportBtn.addEventListener('click', async () => {
-      const target = document.getElementById('reportCapture');
-      const canvas = await html2canvas(target, { backgroundColor: '#030913', scale: 2, useCORS: true });
-      const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `universitylens-${Date.now()}.png`;
-      a.click();
     });
   </script>
 </body>

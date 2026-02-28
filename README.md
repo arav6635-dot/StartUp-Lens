@@ -1,134 +1,57 @@
-# UniversityLens
+# StartupLens: Destroy My Startup
 
-UniversityLens is a Flask-based web app to evaluate a **university + degree** beyond rankings and marketing.
+A Flask app that generates roast or praise for startup landing pages.
 
-It combines:
-- Objective outcomes (salary distribution, debt, dropout, placement, visa outcomes)
-- Subjective signals (Reddit-style student complaints, burnout culture, admin friction)
-- AI-synthesized decision metrics (ROI, pressure, isolation risk, career probability)
+## What it does
 
-## Core Features
+- Accepts a startup URL from the homepage.
+- Checks Neon Postgres cache by normalized domain + mode (`roast` / `praise`).
+- If already generated, reuses cached result instantly.
+- If new, fetches landing-page text + external domain enrichment context and calls Gemini.
+- Stores generated result and shows it on a detailed result page.
+- Shows recent results on homepage.
 
-- Gemini-powered analysis pipeline (no hardcoded report content)
-- Reddit-thread style perception panel
-- Detailed salary analysis:
-  - Percentile distribution (P10/P25/P50/P75/P90)
-  - Top roles with P25/P50/P75 and hiring signal
-- Currency conversion:
-  - Local currency
-  - USD
-  - Additional selectable currencies (from FX rates)
-- Export report as PNG
-- Themed in-page error handling (429/auth/network/general)
-- Safe backend error messages (no API key leakage)
-- In-memory caching to reduce repeat API calls and rate-limit pressure
+## Stack
 
-## Tech Stack
-
-- Backend: Python, Flask, Requests, python-dotenv
-- Frontend: HTML/CSS/vanilla JS
-- AI: Google Gemini API
-- Screenshot export: `html2canvas`
-
-## Project Structure
-
-```text
-.
-├── app.py
-├── requirements.txt
-├── templates/
-│   └── index.html
-└── README.md
-```
-
+- Python + Flask
+- Neon Postgres (via `psycopg`)
+- Gemini API (HTTP call to Generative Language API)
+- Vanilla HTML/CSS templates
 
 ## Setup
 
-1. Create and activate a virtual environment:
+1. Create venv and install packages:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-2. Install dependencies:
-
-```bash
 pip install -r requirements.txt
 ```
 
-3. Create `.env` in project root:
+2. Create `.env` from `.env.example` and fill values:
 
 ```env
-GEMINI_API_KEY=your_api_key_here
+GEMINI_API_KEY=...
 GEMINI_MODEL=gemini-2.5-flash
-GEMINI_FALLBACK_MODELS=gemini-2.0-flash,gemini-1.5-flash
-ANALYSIS_CACHE_TTL_SECONDS=21600
+DATABASE_URL=postgresql://...?...sslmode=require
+DOMAIN_ENRICHMENT_CACHE_HOURS=168
 ```
 
-4. Run app:
+3. Run:
 
 ```bash
 python app.py
 ```
 
-5. Open:
+4. Open:
 
 `http://127.0.0.1:5001`
 
-## Environment Variables
+## Neon table
 
-- `GEMINI_API_KEY` (required): Gemini API key
-- `GEMINI_MODEL` (optional): primary model (default: `gemini-2.0-flash`)
-- `GEMINI_FALLBACK_MODELS` (optional): comma-separated fallback models
-- `ANALYSIS_CACHE_TTL_SECONDS` (optional): in-memory report cache TTL
+Tables are created automatically on startup:
 
-## API
+`roasts(normalized_url + mode UNIQUE, roast_text, request_count, timestamps, ...)`
+`domain_enrichment(domain PK, summary, sources, updated_at)`
 
-### `POST /api/analyze`
-
-Request body:
-
-```json
-{
-  "university": "University Name",
-  "degree": "Degree Program",
-  "country": "Optional country hint",
-  "international": true
-}
-```
-
-Returns a structured report including:
-- `objective`
-- `subjective`
-- `output`
-- `insights`
-- `local_currency`
-- `fx_rates`
-- `supported_currencies`
-
-## Error Handling
-
-- 429 errors are expected on free-tier quotas during peak usage
-- UI shows a styled error panel with actionable message + retry
-- Backend sanitizes provider errors to prevent leaking secrets
-
-## Security Notes
-
-- Never commit `.env`
-- Rotate keys immediately if exposed
-- This project already ignores `.env` via `.gitignore`
-
-## Troubleshooting
-
-- **Port already in use**: change port in `app.py` or kill process on `5001`
-- **429 rate limit**: wait and retry, use fallback models, or move to billed quota
-- **Model not found (404)**: verify `GEMINI_MODEL` / `GEMINI_FALLBACK_MODELS`
-- **Auth error (401/403)**: verify API key and provider access
-
-## Future Improvements
-
-- Add persistent caching (Redis/SQLite)
-- Add real external data connectors for outcomes validation
-- Add report history and comparisons across universities
-- Add authentication and usage analytics
+This guarantees repeated URL+mode requests do not trigger Gemini again, and domain enrichment is reused.

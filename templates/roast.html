@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ roast.display_domain }} | {{ result_mode|capitalize }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #030913;
+      --panel: #07101d;
+      --text: #eaf4ff;
+      --muted: #8ca6c8;
+      --line: #173153;
+      --accent: #32a8ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 25% 0%, rgba(32, 102, 167, 0.3), transparent 40%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Inter", sans-serif;
+      line-height: 1.68;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px 70px;
+    }
+
+    .top {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .brand {
+      font-family: "JetBrains Mono", monospace;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      font-weight: 900;
+      font-size: clamp(34px, 6vw, 64px);
+      line-height: 0.96;
+      text-transform: uppercase;
+      word-break: break-word;
+      background: linear-gradient(180deg, #ffffff, #70b9ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      word-break: break-word;
+    }
+
+    .share {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      max-width: 640px;
+    }
+
+    .share input {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #9ec0e8;
+      font-family: "JetBrains Mono", monospace;
+      width: 100%;
+    }
+
+    .share button {
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #021225;
+      text-transform: uppercase;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+    .share button:hover { background: #66c8ff; }
+
+    .share-status {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: "JetBrains Mono", monospace;
+      min-height: 16px;
+    }
+
+    article p {
+      margin: 0 0 20px;
+      font-size: clamp(20px, 2.2vw, 32px);
+      color: #e6f1ff;
+    }
+
+    .bottom {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .cta {
+      display: inline-block;
+      margin-top: 14px;
+      background: #32a8ff;
+      color: #021225;
+      text-decoration: none;
+      font-family: "JetBrains Mono", monospace;
+      text-transform: uppercase;
+      padding: 12px 22px;
+      border: 1px solid #32a8ff;
+    }
+
+    .home {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #8ca6c8;
+      font-family: "JetBrains Mono", monospace;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 620px) {
+      .share { grid-template-columns: 1fr; }
+      .share button { padding: 10px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="home" href="{{ url_for('home') }}">Back to StartUp Lens</a>
+    <header class="top">
+      <div class="brand">{{ result_mode|upper }} RESULT</div>
+      <h1>{{ roast.display_domain }}</h1>
+      <div class="meta">{{ roast.site_title or roast.original_url }}</div>
+      <div class="share">
+        <input id="share-link" type="text" readonly value="{{ request.url }}" />
+        <button id="copy-link" type="button">Export Result Link</button>
+      </div>
+      <div class="share-status" id="share-status"></div>
+    </header>
+    <article>
+      {% for paragraph in paragraphs %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </article>
+
+    <section class="bottom">
+      <a class="cta" href="{{ roast.original_url }}" target="_blank" rel="noopener noreferrer">
+        Visit {{ roast.display_domain }}
+      </a>
+    </section>
+  </main>
+  <script>
+    const copyButton = document.getElementById("copy-link");
+    const shareLink = document.getElementById("share-link");
+    const shareStatus = document.getElementById("share-status");
+
+    copyButton.addEventListener("click", async () => {
+      const value = shareLink.value;
+      try {
+        await navigator.clipboard.writeText(value);
+        shareStatus.textContent = "Link copied.";
+      } catch (e) {
+        shareLink.select();
+        document.execCommand("copy");
+        shareStatus.textContent = "Link copied.";
+      }
+    });
+  </script>
+</body>
+</html>
