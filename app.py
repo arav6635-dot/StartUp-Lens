@@ -680,11 +680,6 @@ def destroy_api():
     )
 
 
-@app.route("/roast/<slug>", methods=["GET"])
-def roast_detail_legacy(slug: str):
-    return redirect(url_for("result_detail", mode="roast", slug=slug))
-
-
 @app.route("/<mode>/<slug>", methods=["GET"])
 def result_detail(mode: str, slug: str):
     mode = normalize_mode(mode)
